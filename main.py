@@ -1,56 +1,55 @@
 # === main.py ===
 
 import pandas as pd
-from Model.XGBoost import add_time_features, filter_periods, evaluate_period
-from Model.XGBoost import evaluate_combined_model, plot_model_comparison
-import os 
-input_path = os.path.abspath("Data/Combined_Demand_Data.xlsx")
+import os
+from Model.XGBoost import (
+    add_time_features,
+    filter_periods,
+    evaluate_period,
+    evaluate_combined_model,
+    plot_model_comparison
+)
 
+# === CONFIGURATION ===
+DATASETS = {
+    "Scenario1": "Data/Combined_Demand_Data.xlsx",
+    "Scenario2": "Data/EMA_Demand Data (2015-2025).xlsx"
+}
 
-# Load cleaned dataset
-df = pd.read_excel(input_path)
-
-# Drop metadata row and process timestamps
-df = df.drop(index=0)
-df['Date'] = pd.to_datetime(df['Date'])  # Ensure datetime for date column
-df = add_time_features(df)
-
-# Define features and target
+# === FEATURE SETUP ===
 features = ['NEM Demand (Forecast)', 'Hour', 'DayOfWeek', 'TreatAs_DayType_Code']
 target = 'NEM Demand (Actual)'
 
-# Filter periods
-df_covid, df_cny, df_typical = filter_periods(df)
+# === PROCESS EACH SCENARIO ===
+for scenario_label, filepath in DATASETS.items():
+    input_path = os.path.abspath(filepath)
+    output_dir = f"Output/{scenario_label}"
+    os.makedirs(output_dir, exist_ok=True)
 
-# Evaluate each period
-results_covid = evaluate_period(df_covid, features, target, "COVID")
-results_cny = evaluate_period(df_cny, features, target, "CNY")
-results_typical = evaluate_period(df_typical, features, target, "Typical Day")
+    # Load and preprocess
+    df = pd.read_excel(input_path).drop(index=0)
+    df['Date'] = pd.to_datetime(df['Date'])
+    df = add_time_features(df)
 
-# Combine and show results
-combined_results = pd.concat([results_covid, results_cny, results_typical])
-# print("Model Evaluation:\n")
-# print(combined_results)
+    # Filter by time periods
+    df_covid, df_cny, df_typical = filter_periods(df)
+    df_combined = pd.concat([df_covid, df_cny, df_typical], axis=0)
 
-combined_results.to_csv("Output/xgboost_demand_evaluation_results.csv", index=True)
-print("Results saved to 'xgboost_demand_evaluation_results.csv'")
+    # Evaluate each period
+    results_covid = evaluate_period(df_covid, features, target, f"{scenario_label}_COVID")
+    results_cny = evaluate_period(df_cny, features, target, f"{scenario_label}_CNY")
+    results_typical = evaluate_period(df_typical, features, target, f"{scenario_label}_Typical_Day")
+    results_combined = evaluate_combined_model(df_combined, features, target, f"{scenario_label}_Combined")
 
+    # Combine and save results
+    period_results = pd.concat([results_covid, results_cny, results_typical])
+    all_results = pd.concat([period_results, results_combined])
+    
+    # Save results
+    period_results.to_csv(f"{output_dir}/xgboost_demand_evaluation_results.csv", index=True)
+    all_results.to_csv(f"{output_dir}/xgboost_all_periods_evaluation_summary.csv", index=True)
 
-# Evaluate combined model (COVID + CNY + Typical Day samples)
-df_combined = pd.concat([df_covid, df_cny, df_typical], axis=0)
-results_combined = evaluate_combined_model(df_combined, features, target, "Combined")
+    # Plot performance comparison
+    plot_model_comparison(all_results, output_path=f"{output_dir}/comparison_chart.png")
 
-# Combine all evaluation results into a single DataFrame
-final_results = pd.concat([
-    results_covid,
-    results_cny,
-    results_typical,
-    results_combined
-])
-
-# Print and save to CSV
-#print("Full Model Evaluation Summary:\n")
-#print(final_results)
-final_results.to_csv("Output/xgboost_all_periods_evaluation_summary.csv", index=True)
-# Plot
-plot_model_comparison(final_results)
+    print(f"✅ {scenario_label} completed. Results saved to: {output_dir}/")
