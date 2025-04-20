@@ -2,7 +2,7 @@
 
 import pandas as pd
 import os
-from Model.XGBoost import (
+from src.XGBoost import (
     add_time_features,
     filter_periods,
     evaluate_period,
@@ -12,8 +12,8 @@ from Model.XGBoost import (
 
 # === CONFIGURATION ===
 DATASETS = {
-    "Scenario1": "Data/Combined_Demand_Data.xlsx",
-    "Scenario2": "Data/EMA_Demand Data (2015-2025).xlsx"
+    "XGBoost Scenario 1": "Data/Combined_Demand_Data.xlsx",
+    "XGBoost Scenario 2": "Data/EMA_Demand Data (2015-2025).xlsx"
 }
 
 # === FEATURE SETUP ===
@@ -23,15 +23,17 @@ target = 'NEM Demand (Actual)'
 # === PROCESS EACH SCENARIO ===
 for scenario_label, filepath in DATASETS.items():
     input_path = os.path.abspath(filepath)
-    output_dir = f"Output/{scenario_label}"
+    output_dir = f"Output/{scenario_label.replace(' ', '_')}"
     os.makedirs(output_dir, exist_ok=True)
+
+    print(f"\n🚀 Processing {scenario_label}...")
 
     # Load and preprocess
     df = pd.read_excel(input_path).drop(index=0)
     df['Date'] = pd.to_datetime(df['Date'])
     df = add_time_features(df)
 
-    # Filter by time periods
+    # Filter by calendar periods
     df_covid, df_cny, df_typical = filter_periods(df)
     df_combined = pd.concat([df_covid, df_cny, df_typical], axis=0)
 
@@ -44,12 +46,12 @@ for scenario_label, filepath in DATASETS.items():
     # Combine and save results
     period_results = pd.concat([results_covid, results_cny, results_typical])
     all_results = pd.concat([period_results, results_combined])
-    
+
     # Save results
     period_results.to_csv(f"{output_dir}/xgboost_demand_evaluation_results.csv", index=True)
     all_results.to_csv(f"{output_dir}/xgboost_all_periods_evaluation_summary.csv", index=True)
 
-    # Plot performance comparison
+    # Plot comparison chart
     plot_model_comparison(all_results, output_path=f"{output_dir}/comparison_chart.png")
 
     print(f"✅ {scenario_label} completed. Results saved to: {output_dir}/")
