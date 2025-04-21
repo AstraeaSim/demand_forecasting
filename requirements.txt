@@ -4,3 +4,4 @@ matplotlib
 xgboost
 scikit-learn
 openpyxl
+joblib

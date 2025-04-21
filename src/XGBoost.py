@@ -133,8 +133,32 @@ def evaluate_combined_model(df, features, target, label="Combined"):
 
 def plot_model_comparison(results_df, output_path="images/comparison_chart.png"):
     """
-    Plots side-by-side bar charts for MAE, RMSE, and R² metrics for multiple models.
+    Plots bar charts for MAE, RMSE, and R² metrics for multiple models with cleaner labels.
     """
+    import matplotlib.pyplot as plt
+    import os
+
+    # Optional renaming for better legends
+    rename_map = {
+        "XGBoost Scenario 1_COVID-XGBoost": "S1 - COVID",
+        "XGBoost Scenario 1_CNY-XGBoost": "S1 - CNY",
+        "XGBoost Scenario 1_Typical_Day-XGBoost": "S1 - Typical",
+        "XGBoost Scenario 1_Combined-XGBoost": "S1 - Combined",
+
+        "XGBoost Scenario 2_COVID-XGBoost": "S2 - COVID",
+        "XGBoost Scenario 2_CNY-XGBoost": "S2 - CNY",
+        "XGBoost Scenario 2_Typical_Day-XGBoost": "S2 - Typical",
+        "XGBoost Scenario 2_Combined-XGBoost": "S2 - Combined",
+
+        "XGBoost Scenario 3_COVID-XGBoost": "S3 - COVID",
+        "XGBoost Scenario 3_CNY-XGBoost": "S3 - CNY",
+        "XGBoost Scenario 3_Typical_Day-XGBoost": "S3 - Typical",
+        "XGBoost Scenario 3_Combined-XGBoost": "S3 - Combined"
+    }
+
+    results_df = results_df.copy()
+    results_df.index = results_df.index.map(lambda x: rename_map.get(x, x))
+
     model_names = results_df.index.tolist()
     mae_values = results_df['MAE'].tolist()
     rmse_values = results_df['RMSE'].tolist()
