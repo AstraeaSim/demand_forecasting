@@ -9,6 +9,7 @@ This project evaluates electricity demand forecasting performance across multipl
 Two scenarios are explored with separate datasets:
 - **Scenario 1** → Combined_Demand_Data.xlsx
 - **Scenario 2** → EMA_Demand Data (2015-2025).xlsx
+- **Scenario 3** → EMA_Demand_Lagged Data.csv
 
 ---
 
