@@ -55,10 +55,10 @@ def main():
     df = preprocess_data(df)
     os.makedirs("reports/figures", exist_ok=True)
 
-    run_model(df, "Year in [2020, 2021]", "COVID", "reports/figures")
-    run_model(df, "(Month == 1 and Date.dt.day >= 20) or (Month == 2 and Date.dt.day <= 10)", "CNY", "reports/figures")
-    run_model(df, "Year == 2019 and TreatAs_DayType_Code == 0", "Typical 2019", "reports/figures")
-    run_model(df, "Year in [2020, 2021] or ((Month == 1 and Date.dt.day >= 20) or (Month == 2 and Date.dt.day <= 10)) or (Year == 2019 and TreatAs_DayType_Code == 0)", "Combined", "reports/figures")
+    run_model(df, "Year in [2020, 2021]", "COVID", "images")
+    run_model(df, "(Month == 1 and Date.dt.day >= 20) or (Month == 2 and Date.dt.day <= 10)", "CNY", "images")
+    run_model(df, "Year == 2019 and TreatAs_DayType_Code == 0", "Typical 2019", "images")
+    run_model(df, "Year in [2020, 2021] or ((Month == 1 and Date.dt.day >= 20) or (Month == 2 and Date.dt.day <= 10)) or (Year == 2019 and TreatAs_DayType_Code == 0)", "Combined", "images")
 
 if __name__ == "__main__":
     main()
