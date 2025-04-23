@@ -1,87 +1,68 @@
 ## Course: DSS5105 — Data Science Projects in Practice  
 # Semester: AY2024/25 S2
 
+# Demand Forecasting and SHAP Analysis Project
 
-# 📊 XGBoost Demand Forecasting — Scenario Comparison
-
-This project evaluates electricity demand forecasting performance across multiple calendar periods (e.g., COVID, Chinese New Year, Typical Days) 
-
-Two scenarios are explored with separate datasets:
-- **Scenario 1** → Combined_Demand_Data.xlsx
-- **Scenario 2** → EMA_Demand Data (2015-2025).xlsx
-- **Scenario 3** → EMA_Demand_Lagged Data.csv
-
----
-
-## 🚀 How It Works
-
-1. **Feature Engineering**:
-   - Extracts `Hour`, `DayOfWeek`, `TreatAs_DayType_Code`, `Year`, and `Month` from raw timestamps.
-
-2. **Period Segmentation**:
-   - Splits data into:
-     - 🦠 COVID Period (2020–2021)
-     - 🧧 Chinese New Year (Late Jan – Early Feb)
-     - 📅 Typical Weekdays (2019 non-weekends)
-
-3. **Model Training**:
-   - Trains XGBoost Regressors with fixed hyperparameters on each segment and the combined sample.
-
-4. **Evaluation**:
-   - Computes MAE, RMSE, and R².
-   - Generates scatter plots and comparison bar charts.
-   - Saves trained models as `.pkl` files.
-
----
+This repository contains the full pipeline for analyzing and forecasting Singapore's electricity demand using machine learning models, SARIMAX, and LSTM-based approaches with SHAP interpretability.
 
 ## 📁 Project Structure
 
 ```
-Output/
-├── XGBoost_Scenario_1/
-│   ├── xgboost_demand_evaluation_results.csv
-│   ├── xgboost_all_periods_evaluation_summary.csv
-│   ├── comparison_chart.png
-│   ├── models/
-│   └── images/
-├── XGBoost_Scenario_2/
-│   └── same as above
+├── Data/
+│   ├── EMA_Demand Data (2015-2025).xlsx
+│   ├── EMA_Demand_Lagged.csv
+│   └── sg_holiday_cny_covid_2015_2025.xlsx
+├── Output/
+│   ├── Charts/
+│   ├── LSTM_SHAP/
+│   ├── SARIMAX/
+│   ├── Configuration/
+│   ├── Scenario_1/, Scenario_2/, Scenario_3/
+├── src/
+│   ├── eda_demand_forecasting.py
+│   ├── lstm_model.py
+│   ├── models.py
+│   └── time_series_analysis.py
+├── main.py
+└── Insight_Summary_Report.docx
 ```
 
----
+## 🚀 How to Run
 
-## 🧠 Scenarios
+1. Ensure Python 3.8+ is installed.
+2. Install requirements:
+   ```
+   pip install -r requirements.txt
+   ```
+3. Place input data in `Data/` folder.
+4. Run the main pipeline:
+   ```
+   python main.py
+   ```
 
-| Scenario        | Input File                          | Description                            |
-|----------------|--------------------------------------|----------------------------------------|
-| Scenario 1     | `Combined_Demand_Data.xlsx`          | Original demand dataset                |
-| Scenario 2     | `EMA_Demand Data (2015-2025).xlsx`   | Alternative simulation or update       |
+## 📊 Features
 
----
+- **EDA and Feature Engineering**: Generates demand day-type profiles, lagged features, and visualizations.
+- **Machine Learning Forecasting**: Supports XGBoost, LightGBM, CatBoost, and Random Forest across 3 scenario types.
+- **SARIMAX Modeling**: Classical time series modeling for comparison.
+- **LSTM + SHAP**: Neural network model with SHAP-based interpretability to evaluate forecast confidence.
+- **Insight Report**: Includes summary tables and recommendations in `Insight_Summary_Report.docx`.
 
-## 📦 How to Run
+## 📈 Output
 
-```bash
-# Step into project root
-cd your_project_directory/
+All charts, metrics, and model predictions are saved in the `Output/` directory and organized by model or use case.
 
-# Run main script
-python main.py
-```
+## 📌 Contributors
+- Person 1: Data Preprocessing
+- Person 2: ML Model Development
+- Person 3: SHAP + LSTM
+- Person 4: Evaluation Pipeline & Charts
+- Person 5: Insight Synthesis & Reporting
 
-All results will be auto-generated in the `Output/` folder.
+## ✅ Recommendation Summary
 
----
+See `Insight_Summary_Report.docx` for detailed insights, model performance, and operational forecasting recommendations.
 
-## 🛠 Requirements
-
-Install dependencies from `requirements.txt`:
-
-```bash
-pip install -r requirements.txt
-```
-
----
 
 
 
