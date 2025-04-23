@@ -5,3 +5,9 @@ xgboost
 scikit-learn
 openpyxl
 joblib
+lightgbm
+catboost
+sns
+statsmodels
+tensorflow
+shap

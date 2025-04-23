@@ -1,0 +1,14 @@
+Model Configuration:
+Target: NEM Demand (Actual)
+Model Types: ['xgboost', 'random_forest', 'lightgbm', 'catboost']
+
+Scenario 1 Features: ['NEM Demand (Forecast)', 'Hour', 'DayOfWeek', 'TreatAs_DayType_Code']
+
+Scenario 2 Features: ['NEM Demand (Forecast)', 'Hour', 'DayOfWeek', 'TreatAs_DayType_Code']
+
+Scenario 3 Features: ['NEM Demand (Forecast)', 'NEM Demand (Actual)_lag1', 'NEM Demand (Actual)_lag2', 'NEM Demand (Actual)_lag3', 'NEM Demand (Forecast)_lag1', 'NEM Demand (Forecast)_lag2', 'NEM Demand (Forecast)_lag3', 'Hour', 'DayOfWeek', 'TreatAs_DayType_Code']
+
+Datasets:
+Scenario 1: Data/Combined_Demand_Data.xlsx
+Scenario 2: Data/EMA_Demand Data (2015-2025).xlsx
+Scenario 3: Data/EMA_Demand_Lagged.csv

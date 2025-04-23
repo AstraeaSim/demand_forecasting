@@ -1,0 +1,11 @@
+,0
+NEM Demand (Forecast),0.93493724
+NEM Demand (Actual)_lag1,0.060828645
+NEM Demand (Forecast)_lag1,0.0020575263
+NEM Demand (Forecast)_lag2,0.0011161036
+Hour,0.0010604976
+NEM Demand (Actual)_lag2,0.0
+NEM Demand (Actual)_lag3,0.0
+NEM Demand (Forecast)_lag3,0.0
+DayOfWeek,0.0
+TreatAs_DayType_Code,0.0
