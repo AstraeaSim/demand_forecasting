@@ -52,12 +52,7 @@ This repository contains the full pipeline for analyzing and forecasting Singapo
 
 All charts, metrics, and model predictions are saved in the `Output/` directory and organized by model or use case.
 
-## 📌 Contributors
-- Person 1: Data Preprocessing
-- Person 2: ML Model Development
-- Person 3: SHAP + LSTM
-- Person 4: Evaluation Pipeline & Charts
-- Person 5: Insight Synthesis & Reporting
+
 
 ## ✅ Recommendation Summary
 
