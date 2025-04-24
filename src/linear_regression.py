@@ -6,6 +6,7 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 import matplotlib.pyplot as plt
 import os
 
+# === Data Preprocessing ===
 def preprocess_data(df):
     df['Date'] = pd.to_datetime(df['Date'])
     df['Hour'] = pd.to_datetime(df['Period Ending Time'], format="%H:%M").dt.hour
@@ -16,8 +17,13 @@ def preprocess_data(df):
     df['DayType_Hour'] = df['TreatAs_DayType_Code'] * df['Hour']
     return df
 
-def run_model(df, condition, label, output_dir):
-    filtered_df = df.query(condition).sample(frac=0.2, random_state=42)
+# === Model Training and Evaluation ===
+def run_model(df, condition, label, output_dir, results_list):
+    if condition != "True":
+        filtered_df = df.query(condition).sample(frac=0.2, random_state=42)
+    else:
+        filtered_df = df.sample(frac=0.2, random_state=42)
+
     features = ['NEM Demand (Forecast)', 'Hour', 'DayOfWeek', 'TreatAs_DayType_Code', 'DayType_Hour']
     target = 'NEM Demand (Actual)'
 
@@ -38,6 +44,16 @@ def run_model(df, condition, label, output_dir):
     print(f"RMSE: {rmse:.2f}")
     print(f"R²:   {r2:.5f}")
 
+    # Append results to list
+    results_list.append({
+        "Label": label,
+        "MAE": round(mae, 2),
+        "RMSE": round(rmse, 2),
+        "R²": round(r2, 5)
+    })
+
+    # Save scatter plot
+    os.makedirs(output_dir, exist_ok=True)
     plt.figure(figsize=(8, 5))
     plt.scatter(y_test, y_pred, alpha=0.3)
     plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'r--')
@@ -50,15 +66,34 @@ def run_model(df, condition, label, output_dir):
     plt.savefig(fig_path)
     plt.close()
 
-def main():
-    df = pd.read_csv("data/demand_feature_dataset.csv")
+# === Main Script ===
+def run_linear_regression_analysis():
+    df = pd.read_csv("Output/EDA/demand_feature_dataset.csv")
     df = preprocess_data(df)
-    os.makedirs("reports/figures", exist_ok=True)
+    os.makedirs("images", exist_ok=True)
 
-    run_model(df, "Year in [2020, 2021]", "COVID", "images")
-    run_model(df, "(Month == 1 and Date.dt.day >= 20) or (Month == 2 and Date.dt.day <= 10)", "CNY", "images")
-    run_model(df, "Year == 2019 and TreatAs_DayType_Code == 0", "Typical 2019", "images")
-    run_model(df, "Year in [2020, 2021] or ((Month == 1 and Date.dt.day >= 20) or (Month == 2 and Date.dt.day <= 10)) or (Year == 2019 and TreatAs_DayType_Code == 0)", "Combined", "images")
+    results = []
+
+    run_model(df, "Year in [2020, 2021]", "COVID", "images", results)
+
+    cny_mask = ((df['Month'] == 1) & (df['Date'].dt.day >= 20)) | \
+               ((df['Month'] == 2) & (df['Date'].dt.day <= 10))
+    run_model(df[cny_mask], "True", "CNY", "images", results)
+
+    run_model(df, "Year == 2019 and TreatAs_DayType_Code == 0", "Typical 2019", "images", results)
+
+    combined_mask = (
+        (df['Year'].isin([2020, 2021])) |
+        (((df['Month'] == 1) & (df['Date'].dt.day >= 20)) | ((df['Month'] == 2) & (df['Date'].dt.day <= 10))) |
+        ((df['Year'] == 2019) & (df['TreatAs_DayType_Code'] == 0))
+    )
+    run_model(df[combined_mask], "True", "Combined", "images", results)
+
+    # Save results to CSV
+    results_df = pd.DataFrame(results)
+    os.makedirs("Output/Linear", exist_ok=True)
+    results_df.to_csv("Output/Linear/linear_regression_metrics.csv", index=False)
+    print("📁 Linear regression metrics saved to images/linear_regression_metrics.csv")
 
 if __name__ == "__main__":
-    main()
+    run_linear_regression_analysis()

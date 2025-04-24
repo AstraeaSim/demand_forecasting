@@ -1,0 +1,2 @@
+Model,MAE,RMSE,R²
+Ensemble (LR + DT),45.69,60.89,0.99214
