@@ -3,7 +3,7 @@ from src.lstm_model import run_lstm_analysis_all_periods,regenerate_demand_lagge
 from src.EDA import run_eda_pipeline
 from src.ensemble_model import run_ensemble_model,preprocess_data
 from src.linear_regression import run_linear_regression_analysis
-from src.utils_sarimax import generate_sarimax_merged
+from src.utils_sarimax import run_sarimax_comparison
 from src.demand_forecasting_pipeline import run_full_demand_forecasting_pipeline
 from src.plot_utils import generate_all_plots
 from src.shap_model import run_lstm_with_shap_interpretation
@@ -104,22 +104,9 @@ def main():
     print("🚀 Running SHAP pipeline...")
     run_lstm_with_shap_interpretation()
     
-    
-    print("🚀 Running SARIMAX forecasting pipeline...")
-    my_dataframe = generate_sarimax_merged()
-    #my_dataframe.set_index('Datetime', inplace=True)
+    print("📊 Running SARIMAX forecasting...")
+    run_sarimax_comparison()
 
-    run_sarimax_forecast_with_outputs(
-        df=my_dataframe,
-        target_col="NEM Demand (Actual)",
-        exog_cols=[
-        "NEM Demand (Forecast)",
-        "NEM Demand (Actual)_lag1",
-        "NEM Demand (Actual)_lag2",
-        "NEM Demand (Actual)_lag3"
-        ],
-        output_dir="Output/Sarimax/weekday"
-)
 
 if __name__ == "__main__":
     main()
