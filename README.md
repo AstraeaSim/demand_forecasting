@@ -16,10 +16,10 @@ project_root/
 │   ├── Charts/               # Performance comparison plots
 │   └── final_combined_all_models_results.csv
 ├── src/                      # Modular Python scripts
-│   ├── lstm_analysis_utils.py
-│   ├── preprocessing_utils.py
-│   ├── plot_generation_utils.py
-│   └── sarimax_forecasting.py
+│   ├── lstm_model.py
+│   ├── plot_utils.py
+│   ├── ensemble_model.py
+│   └── sarimax_model.py
 └── main.py                   # Execution entry point
 ```
 
@@ -43,16 +43,16 @@ project_root/
 - Handles model training, evaluation, and metric exports for each scenario
 - Calls visualization modules and LSTM SHAP interpreter
 
-### 2. `lstm_analysis_utils.py`
+### 2. `lstm_model.py`
 - Trains LSTM models across different day types
 - Supports SHAP explainability
 - Outputs performance CSV + force and summary plots
 
-### 3. `sarimax_forecasting.py`
+### 3. `sarimax_model.py`
 - Implements SARIMAX forecasting for different day types
 - Evaluates and visualizes time series prediction results
 
-### 4. `plot_generation_utils.py`
+### 4. `plot_utils.py`
 - Bar Charts (MAE, RMSE, R²)
 - Boxplot of errors
 - Residual plots
