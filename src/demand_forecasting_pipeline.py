@@ -27,7 +27,9 @@ def filter_periods(df, frac=0.2):
     df_cny = df[cny_mask].sample(frac=frac, random_state=42)
     typical_mask = (df['Year'] == 2019) & (df['TreatAs_DayType_Code'] == 0)
     df_typical = df[typical_mask].sample(frac=frac, random_state=42)
-    return df_covid, df_cny, df_typical
+    df_saturday = df[df['DayOfWeek'] == 5].sample(frac=frac, random_state=42)
+    df_sunday = df[df['DayOfWeek'] == 6].sample(frac=frac, random_state=42)
+    return df_covid, df_cny, df_typical, df_saturday, df_sunday
 
 # === Model Evaluation ===
 def evaluate_period(data, features, target, label, model_type="xgboost"):
@@ -128,16 +130,18 @@ def run_full_demand_forecasting_pipeline():
             df['Period Ending Time'] = pd.to_datetime(df['Period Ending Time'], format="%H:%M", errors='coerce')
             df = add_time_features(df)
 
-            df_covid, df_cny, df_typical = filter_periods(df, frac=0.2)
-            df_combined = pd.concat([df_covid, df_cny, df_typical], axis=0)
+            df_covid, df_cny, df_typical, df_saturday, df_sunday = filter_periods(df, frac=0.2)
+            df_combined = pd.concat([df_covid, df_cny, df_typical, df_saturday, df_sunday], axis=0)
             features = FEATURE_SETS[scenario_label]
 
             results_covid = evaluate_period(df_covid, features, target, f"{scenario_label}_COVID", model_type)
             results_cny = evaluate_period(df_cny, features, target, f"{scenario_label}_CNY", model_type)
             results_typical = evaluate_period(df_typical, features, target, f"{scenario_label}_Typical_Day", model_type)
+            results_saturday = evaluate_period(df_saturday, features, target, f"{scenario_label}_Saturday", model_type)
+            results_sunday = evaluate_period(df_sunday, features, target, f"{scenario_label}_Sunday", model_type)
             results_combined = evaluate_combined_model(df_combined, features, target, f"{scenario_label}_Combined", model_type)
 
-            all_results = pd.concat([results_covid, results_cny, results_typical, results_combined])
+            all_results = pd.concat([results_covid, results_cny, results_typical, results_saturday, results_sunday, results_combined])
             all_results['Model_Type'] = model_type
 
             out_dir = os.path.join("Output", scenario_label.replace(" ", "_"))

@@ -1,11 +1,12 @@
 from src.SARIMAX_model import run_sarimax_forecast_with_outputs
-from src.lstm_model import run_lstm_shap_analysis
+from src.lstm_model import run_lstm_analysis_all_periods,regenerate_demand_lagged_csv
 from src.EDA import run_eda_pipeline
 from src.ensemble_model import run_ensemble_model,preprocess_data
 from src.linear_regression import run_linear_regression_analysis
 from src.utils_sarimax import generate_sarimax_merged
 from src.demand_forecasting_pipeline import run_full_demand_forecasting_pipeline
 from src.plot_utils import generate_all_plots
+from src.shap_model import run_lstm_with_shap_interpretation
 from src.models import (
     add_time_features,
     filter_periods,
@@ -85,8 +86,24 @@ def main():
     
     generate_all_plots(df_combined, summary_df, models)
     
-    print("🧠 Running LSTM + SHAP interpretability pipeline...")
-    run_lstm_shap_analysis()
+    print("🧠 Running LSTM  pipeline...")
+    # Load preprocessed lagged dataset
+    regenerate_demand_lagged_csv()
+    demand_lagged = pd.read_csv("Data/demand_feature_dataset_LSTM.csv",parse_dates=["Datetime"])
+    demand_lagged.set_index("Datetime", inplace=True)  # Reapply index if needed
+
+    # Run LSTM analysis across all scenarios
+    result_df = run_lstm_analysis_all_periods(demand_lagged)
+
+    # Save results
+    os.makedirs("Output/LSTM", exist_ok=True)
+    result_df.to_csv("Output/LSTM/LSTM_Performance_By_Period.csv", index=False)
+
+    print("✅ LSTM results saved to Output/LSTM/")
+    
+    print("🚀 Running SHAP pipeline...")
+    run_lstm_with_shap_interpretation()
+    
     
     print("🚀 Running SARIMAX forecasting pipeline...")
     my_dataframe = generate_sarimax_merged()
