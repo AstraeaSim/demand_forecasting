@@ -107,9 +107,7 @@ All charts, metrics, and model predictions are saved in the `Output/` directory 
 
 
 
-## ✅ Recommendation Summary
 
-See `Insight_Summary_Report.docx` for detailed insights, model performance, and operational forecasting recommendations.
 
 
 
