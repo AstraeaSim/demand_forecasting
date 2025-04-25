@@ -11,3 +11,4 @@ sns
 statsmodels
 tensorflow
 shap
+seaborn

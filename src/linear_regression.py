@@ -1,3 +1,4 @@
+
 import pandas as pd
 import numpy as np
 from sklearn.linear_model import LinearRegression
@@ -18,11 +19,8 @@ def preprocess_data(df):
     return df
 
 # === Model Training and Evaluation ===
-def run_model(df, condition, label, output_dir, results_list):
-    if condition != "True":
-        filtered_df = df.query(condition).sample(frac=0.2, random_state=42)
-    else:
-        filtered_df = df.sample(frac=0.2, random_state=42)
+def run_model(df, label, output_dir, results_list):
+    filtered_df = df.sample(frac=0.2, random_state=42)
 
     features = ['NEM Demand (Forecast)', 'Hour', 'DayOfWeek', 'TreatAs_DayType_Code', 'DayType_Hour']
     target = 'NEM Demand (Actual)'
@@ -34,6 +32,15 @@ def run_model(df, condition, label, output_dir, results_list):
     model = LinearRegression()
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
+    
+    # Save results
+    df = pd.DataFrame({
+    'Actual': y_test,
+    'Predicted': y_pred
+    })
+    output_dir = "Output/Linear"
+    os.makedirs(output_dir, exist_ok=True)
+    df.to_csv('Output/Linear/actual_vs_predicted_linear.csv', index=False)
 
     mae = mean_absolute_error(y_test, y_pred)
     rmse = np.sqrt(mean_squared_error(y_test, y_pred))
@@ -44,22 +51,20 @@ def run_model(df, condition, label, output_dir, results_list):
     print(f"RMSE: {rmse:.2f}")
     print(f"R²:   {r2:.5f}")
 
-    # Append results to list
     results_list.append({
         "Label": label,
         "MAE": round(mae, 2),
         "RMSE": round(rmse, 2),
         "R²": round(r2, 5)
     })
-
-    # Save scatter plot
-    os.makedirs(output_dir, exist_ok=True)
+    
+    
     plt.figure(figsize=(8, 5))
     plt.scatter(y_test, y_pred, alpha=0.3)
     plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'r--')
     plt.xlabel("Actual NEM Demand")
     plt.ylabel("Predicted NEM Demand")
-    plt.title(f"{label} - Linear Regression + Interaction")
+    plt.title(f"{label} - Linear Regression")
     plt.grid(True)
     plt.tight_layout()
     fig_path = os.path.join(output_dir, f"{label.lower().replace(' ', '_')}_scatter.png")
@@ -74,26 +79,21 @@ def run_linear_regression_analysis():
 
     results = []
 
-    run_model(df, "Year in [2020, 2021]", "COVID", "images", results)
+    run_model(df[df['DayOfWeek'] < 5], "Weekdays", "images", results)
+    run_model(df[df['DayOfWeek'] == 5], "Saturday", "images", results)
+    run_model(df[df['DayOfWeek'] == 6], "Sunday", "images", results)
 
-    cny_mask = ((df['Month'] == 1) & (df['Date'].dt.day >= 20)) | \
-               ((df['Month'] == 2) & (df['Date'].dt.day <= 10))
-    run_model(df[cny_mask], "True", "CNY", "images", results)
+    cny_mask = ((df['Month'] == 1) & (df['Date'].dt.day >= 20)) | ((df['Month'] == 2) & (df['Date'].dt.day <= 10))
+    run_model(df[cny_mask], "CNY", "images", results)
 
-    run_model(df, "Year == 2019 and TreatAs_DayType_Code == 0", "Typical 2019", "images", results)
+    run_model(df[df['Year'].isin([2020, 2021])], "COVID", "images", results)
 
-    combined_mask = (
-        (df['Year'].isin([2020, 2021])) |
-        (((df['Month'] == 1) & (df['Date'].dt.day >= 20)) | ((df['Month'] == 2) & (df['Date'].dt.day <= 10))) |
-        ((df['Year'] == 2019) & (df['TreatAs_DayType_Code'] == 0))
-    )
-    run_model(df[combined_mask], "True", "Combined", "images", results)
+    run_model(df, "Overall", "images", results)
 
-    # Save results to CSV
     results_df = pd.DataFrame(results)
     os.makedirs("Output/Linear", exist_ok=True)
     results_df.to_csv("Output/Linear/linear_regression_metrics.csv", index=False)
-    print("📁 Linear regression metrics saved to images/linear_regression_metrics.csv")
+    print("📁 Linear regression metrics saved to Output/Linear/linear_regression_metrics.csv")
 
 if __name__ == "__main__":
     run_linear_regression_analysis()

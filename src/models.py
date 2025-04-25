@@ -50,6 +50,15 @@ def evaluate_period(data, features, target, label, model_type="xgboost"):
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
 
+        # Save results
+    df = pd.DataFrame({
+    'Actual': y_test,
+    'Predicted': y_pred
+    })
+    output_dir = "Output/Linear"
+    os.makedirs(output_dir, exist_ok=True)
+    df.to_csv('Output/Linear/actual_vs_predicted_linear.csv', index=False)
+    
     # Calculate metrics
     mae = mean_absolute_error(y_test, y_pred)
     rmse = np.sqrt(mean_squared_error(y_test, y_pred))

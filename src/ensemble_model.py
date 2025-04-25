@@ -1,3 +1,4 @@
+
 import pandas as pd
 import numpy as np
 import os
@@ -19,12 +20,14 @@ def preprocess_data(df):
     return df
 
 # === Ensemble Modeling and Evaluation ===
-def run_ensemble_model(df, output_dir):
+def run_ensemble_model(df, label, output_dir, results_list):
+    filtered_df = df.sample(frac=0.2, random_state=42)
+
     features = ['NEM Demand (Forecast)', 'Hour', 'DayOfWeek', 'TreatAs_DayType_Code', 'DayType_Hour']
     target = 'NEM Demand (Actual)'
 
-    X = df[features]
-    y = df[target]
+    X = filtered_df[features]
+    y = filtered_df[target]
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     lr_model = LinearRegression()
@@ -34,6 +37,15 @@ def run_ensemble_model(df, output_dir):
     dt_model = DecisionTreeRegressor(random_state=42)
     dt_model.fit(X_train, y_train)
     dt_pred = dt_model.predict(X_test)
+    
+        # Save results
+    df = pd.DataFrame({
+    'Actual': y_test,
+    'Predicted': dt_pred
+    })
+    output_dir = "Output/Ensemble"
+    os.makedirs(output_dir, exist_ok=True)
+    df.to_csv('Output/Ensemble/actual_vs_predicted_ensemble.csv', index=False)
 
     ensemble_pred = (lr_pred + dt_pred) / 2
 
@@ -41,43 +53,32 @@ def run_ensemble_model(df, output_dir):
     rmse = np.sqrt(mean_squared_error(y_test, ensemble_pred))
     r2 = r2_score(y_test, ensemble_pred)
 
-    print("=== Ensemble Model Evaluation ===")
+    print(f"=== {label} ===")
     print(f"MAE:  {mae:.2f}")
     print(f"RMSE: {rmse:.2f}")
     print(f"R²:   {r2:.5f}")
 
-    # Ensure directory exists
-    os.makedirs(output_dir, exist_ok=True)
+    os.makedirs(output_dir, exist_ok=True)  # <- Fix: no overwrite
+    fig_path = os.path.join(output_dir, f"{label.lower().replace(' ', '_')}_ensemble_scatter.png")
 
-    # Save scatter plot
-    fig_path = os.path.join(output_dir, "ensemble_model_scatter.png")
     plt.figure(figsize=(8, 5))
     plt.scatter(y_test, ensemble_pred, alpha=0.3)
     plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'r--')
     plt.xlabel("Actual NEM Demand")
     plt.ylabel("Predicted NEM Demand")
-    plt.title("Ensemble Model (LR + Decision Tree)")
+    plt.title(f"{label} - Ensemble Model (LR + DT)")
     plt.grid(True)
     plt.tight_layout()
     plt.savefig(fig_path)
     plt.close()
 
-    # Save metrics
-    metrics_df = pd.DataFrame([{
-        "Model": "Ensemble (LR + DT)",
+    results_list.append({
+        "Label": label,
         "MAE": round(mae, 2),
         "RMSE": round(rmse, 2),
         "R²": round(r2, 5)
-    }])
-    metrics_path = os.path.join(output_dir, "ensemble_model_metrics.csv")
-    metrics_df.to_csv(metrics_path, index=False)
-    print(f"📁 Metrics saved to: {metrics_path}")
-
+    })
 # === Main Runner ===
-def main():
-    df = pd.read_csv("Data/EMA_Demand_Lagged.csv")
-    df = preprocess_data(df)
-    run_ensemble_model(df, "images")
 
 if __name__ == "__main__":
-    main()
+    run_ensemble_model()
