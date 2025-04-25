@@ -1,7 +1,7 @@
-## Course: DSS5105 — Data Science Projects in Practice  
+## Course: DSS5104 — DSS5104 Machine Learning and Predictive Modelling 
 # Semester: AY2024/25 S2
 
-# Demand Forecasting and SHAP Analysis Project
+# Improving Electricity Demand Forecasting Using Machine Learning
 
 This repository contains the full pipeline for analyzing and forecasting Singapore's electricity demand using machine learning models, SARIMAX, and LSTM-based approaches with SHAP interpretability.
 
